@@ -42,8 +42,6 @@ void init_student(struct student* student, char* name, int id, float gpa) {
     char* n = malloc(length * sizeof(char));
     strcpy(n, name);
 
-    free_student(student);
-
     student->name = n;
     student->id = id;
     student->gpa = gpa;
@@ -59,10 +57,7 @@ void init_student(struct student* student, char* name, int id, float gpa) {
  *     struct itself should not be freed.
  */
 void free_student(struct student* student) {
-    if (student->name) {
-        free_student(student);
-        student->name = NULL;
-    }
+    free(student->name);
 }
 
 
@@ -86,9 +81,7 @@ void free_student(struct student* student) {
 struct student* deep_copy_student(struct student* student) {
     struct student* s = malloc(sizeof(struct student));
 
-    s->name = student->name;
-    s->id = student->id;
-    s->gpa = student->gpa;
+    init_student(s, student->name, student->id, student->gpa);
 
     return s;
 }
@@ -147,6 +140,7 @@ void destroy_student_array(struct student* students, int num_students) {
     for (size_t i = 0; i < num_students; i++) {
         free_student(students + i);
     }
+    free(students);
 }
 
 
@@ -161,10 +155,7 @@ void destroy_student_array(struct student* students, int num_students) {
 void print_students(struct student* students, int num_students) {
     for (size_t i = 0; i < num_students; i++) {
         struct student s = students[i];
-
-        printf("Name: %s\n", s.name);
-        printf("ID: %i\n", s.id);
-        printf("GPA: %f\n\n", s.gpa);
+        printf("%i. Name: %s, ID: %i, GPA: %f\n", i + 1, s.name, s.id, s.gpa);
     }
 }
 
@@ -245,7 +236,7 @@ struct student* find_min_gpa(struct student* students, int num_students) {
  *   num_students - the number of students in the array
  */
 void sort_by_gpa(struct student* students, int num_students) {
-    //quick_sort(students, 0, num_students - 1);
+    quick_sort(students, 0, num_students - 1);
 }
 
 /**
@@ -272,7 +263,6 @@ void quick_sort(struct student* students, int a, int b) {
  */
 int partition(struct student* students, int a, int b) {
     float pivot = students[b].gpa;
-
     int i = a - 1;
 
     for (size_t j = a; j <= b - 1; j++) {
